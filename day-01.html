@@ -1,170 +1,40 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="zh-Hant-TW">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>第 1 天｜禁食的角色</title>
   <style>
-    :root {
-      color-scheme: light;
-      --bg: #f7f3ea;
-      --paper: #fffdf8;
-      --ink: #243044;
-      --muted: #6c7280;
-      --accent: #9b6a2f;
-      --accent-dark: #6d461d;
-      --line: rgba(96, 67, 32, .18);
-    }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Noto Sans TC", "Microsoft JhengHei", sans-serif;
-      background:
-        radial-gradient(circle at top left, rgba(255, 227, 171, .55), transparent 32rem),
-        linear-gradient(180deg, #fbf5e8 0%, #f6f1e9 100%);
-      color: var(--ink);
-      line-height: 1.9;
-    }
-    main {
-      width: min(100%, 760px);
-      margin: 0 auto;
-      padding: 22px 16px 44px;
-    }
-    .card {
-      background: rgba(255, 253, 248, .94);
-      border: 1px solid var(--line);
-      border-radius: 24px;
-      box-shadow: 0 18px 48px rgba(72, 47, 20, .13);
-      overflow: hidden;
-    }
-    header {
-      padding: 28px 22px 22px;
-      background: linear-gradient(145deg, rgba(151, 100, 42, .13), rgba(255, 255, 255, 0));
-      border-bottom: 1px solid var(--line);
-    }
-    .meta {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      color: var(--accent-dark);
-      font-weight: 700;
-      letter-spacing: .02em;
-    }
-    .pill {
-      padding: 5px 11px;
-      border-radius: 999px;
-      background: #fff1d7;
-      border: 1px solid rgba(155, 106, 47, .2);
-      font-size: 14px;
-    }
-    h1 {
-      margin: 16px 0 4px;
-      font-size: clamp(30px, 8vw, 44px);
-      line-height: 1.18;
-      letter-spacing: 0;
-      color: #1f2937;
-    }
-    .subtitle {
-      margin: 0;
-      color: var(--muted);
-      font-size: 15px;
-    }
-    .player {
-      margin-top: 22px;
-      padding: 14px;
-      border-radius: 18px;
-      background: #fff8eb;
-      border: 1px solid rgba(155, 106, 47, .18);
-    }
-    .player-label {
-      margin: 0 0 9px;
-      font-size: 14px;
-      color: var(--accent-dark);
-      font-weight: 700;
-    }
-    audio {
-      width: 100%;
-      display: block;
-      accent-color: var(--accent);
-    }
-    article {
-      padding: 24px 22px 30px;
-    }
-    p {
-      margin: 0 0 18px;
-      font-size: 18px;
-      text-align: justify;
-    }
-    .scripture {
-      padding: 16px 17px;
-      border-left: 4px solid var(--accent);
-      border-radius: 14px;
-      background: #fff7e8;
-      color: #3b2f22;
-      font-weight: 500;
-    }
-    .prayer-heading {
-      margin-top: 26px;
-      color: var(--accent-dark);
-      font-size: 22px;
-      font-weight: 800;
-      text-align: left;
-    }
-    .audio-missing {
-      padding: 12px;
-      color: #8a3b12;
-      background: #fff4e6;
-      border-radius: 12px;
-      font-size: 14px;
-    }
-    footer {
-      padding: 18px 22px 24px;
-      color: var(--muted);
-      font-size: 13px;
-      border-top: 1px solid var(--line);
-      background: rgba(255, 250, 240, .7);
-    }
-    @media (max-width: 430px) {
-      main { padding: 12px 10px 30px; }
-      .card { border-radius: 20px; }
-      header { padding: 24px 18px 20px; }
-      article { padding: 22px 18px 28px; }
-      p { font-size: 17px; line-height: 1.88; text-align: left; }
-    }
-  </style>
+:root{--bg:#f6efe3;--card:#fffdf8;--ink:#243044;--muted:#687083;--accent:#9b6a2f;--accent2:#fff1d7;--line:rgba(93,63,30,.16)}
+*{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC","Microsoft JhengHei",sans-serif;background:radial-gradient(circle at top left,rgba(255,223,162,.65),transparent 28rem),linear-gradient(180deg,#fbf5e8,#f4efe8);color:var(--ink);line-height:1.95}main{width:min(100%,760px);margin:0 auto;padding:22px 15px 48px}.card{background:rgba(255,253,248,.96);border:1px solid var(--line);border-radius:26px;box-shadow:0 18px 46px rgba(72,47,20,.13);overflow:hidden}header{padding:28px 22px 22px;background:linear-gradient(145deg,rgba(151,100,42,.14),rgba(255,255,255,0));border-bottom:1px solid var(--line)}.meta{display:flex;gap:10px;flex-wrap:wrap;color:#6d461d;font-weight:800}.pill{padding:5px 12px;border-radius:999px;background:var(--accent2);border:1px solid rgba(155,106,47,.2);font-size:14px}h1{margin:16px 0 4px;font-size:clamp(31px,8vw,44px);line-height:1.18}.subtitle{margin:0;color:var(--muted);font-size:15px}.player{margin-top:22px;padding:14px;border-radius:18px;background:#fff8eb;border:1px solid rgba(155,106,47,.2)}.player-label{margin:0 0 9px;color:#6d461d;font-weight:800;font-size:14px}audio{width:100%;display:block;accent-color:var(--accent)}section.content{padding:22px}.paragraph,.scripture,.prayer-heading{font-size:18px;margin:0 0 18px;letter-spacing:.01em}.scripture{padding:16px 17px;border-radius:18px;background:#f8f1e6;border-left:5px solid var(--accent);color:#384052}.prayer-heading{margin-top:24px;color:#805322;font-weight:900;font-size:20px}.footer-note{margin-top:28px;padding-top:18px;border-top:1px solid var(--line);color:var(--muted);font-size:14px}@media(max-width:430px){main{padding:12px 10px 34px}.card{border-radius:22px}header{padding:24px 18px 20px}section.content{padding:20px 17px}.paragraph,.scripture,.prayer-heading{font-size:17px;line-height:1.98}}
+</style>
 </head>
 <body>
-  <main>
-    <section class="card">
-      <header>
-        <div class="meta">
-          <span class="pill">第 1 天</span>
-          <span>2026-07-13</span>
-        </div>
-        <h1>禁食的角色</h1>
-        <p class="subtitle">21 天禁禱禱告指引｜手機閱讀版</p>
-        <div class="player">
-          <p class="player-label">朗讀音檔</p>
-          <audio controls preload="metadata" src="day-01.wav"></audio>
-        </div>
-      </header>
-      <article>
-        <p class="scripture">「那時，約翰的門徒來見耶穌，說：『我們和法利賽</p>
-<p class="paragraph">人常常禁食，你的門徒倒不禁食，這是為甚麼呢？』耶穌對他們說：『新郎和陪伴之人同在的時候，陪伴之人豈能哀慟呢？但日子將到，新郎要離開他們，那時候他們就要禁食。』」（太 9:14-15）</p>
-<p class="paragraph">今天，我們要查考聖經中關於禁食的實踐、姿態與應許。禁食或許對我們的文化而言顯得陌生，但卻該是跟 隨 耶 穌 門 徒 的 生 活 方 式 。 禁 食 使 我 們 謙 卑 （ 詩69:10），喚醒我們屬靈的渴慕（林前 6:12；腓 3:19、8），賦予禱告能力（拉 8:23；珥 2:12；拿 3:10），並且突破邪靈權勢（但 10 章；太 17:19-21）。</p>
-<p class="paragraph">首先，禁食是一項合乎聖經的操練。摩西、大衛、以利亞、但以理、以斯帖、哈拿與亞拿，都將自己投入禁食（但 10 章；拿 3 章；代下 20 章；王上 19 章）。禁食的實踐同樣貫穿教會歷史。初代教會每週禁食兩次；後來如約翰‧衛斯理（John Wesley）、喬治‧懷特腓（George Whitefield）、馬丁‧路德（Martin Luther）、約翰‧諾克斯（John Knox）、大衛‧布雷納德（DavidBrainerd）等人也都如此，我們的屬靈前輩們皆參與禁食。最重要的是，我們的主耶穌親自吩咐門徒：不是</p>
-<p class="scripture">「若你們禁食」，而是「當你們禁食的時候」（太</p>
-<p class="paragraph">6:16–18）。禁食不僅是外在的回應或行為，它源自一個對神極度渴慕的姿態。在馬太福音 9:15-16 中，耶穌將祂的教會從沒有生命力的宗教活動、與殘酷的苦修主義中釋放出來，清楚說明了我們為何、以及何時要禁食。翻成現代語言，耶穌是在說：「當我與你們同在時，是說不出的喜樂；但有一天我將離開，當我不在時，你們會非常深切地想念我、渴望我回來，以至於你們願意付上一切代價，只為再得著我——甚至禁食。」為宗教緣故禁食將導致死亡（林後 3:6）。若是人為的計畫為復興而禁食禱告，也終將無可避免地導致灰心或冷漠。然而，我們禁食與禱告，應首先在我們個人的生命中，並出自對著祂的渴慕。當我們禁食，我們放下其他所有的追求，甚至包含身體對食物的基本需要，因著這份只為祂、佔據一切思緒的渴望。但同時，我們在吃另一種糧——天上的糧。正如我們的主在禁食時所說的：</p>
-<p class="scripture">「人活着，不是單靠食物，乃是靠神口裏所出的一切</p>
-<p class="paragraph">話。」（太 4:4）為著復興的真實禁食禱告，其實就是迫切渴望祂集體性的造訪我們（徒 3:19-20），渴望祂介入我們的國家。這不僅止於靈魂得救或神蹟發生，終極目標在於百姓再次普及、群體性地靠祂歡喜（詩85:6）。在那日未到之前，我們持續為著良人的造訪而哀慟、禁食。</p>
+<main>
+  <article class="card">
+    <header>
+      <div class="meta"><span class="pill">第 1 天</span><span class="pill">2026/7/13</span></div>
+      <h1>禁食的角色</h1>
+      <p class="subtitle">2026 21天禁禱禱告指引｜手機閱讀版</p>
+      <div class="player">
+        <p class="player-label">朗讀音檔</p>
+        <audio controls preload="metadata" src="day-01.wav"></audio>
+      </div>
+    </header>
+    <section class="content">
+      <p class="scripture">「那時，約翰的門徒來見耶穌，說：『我們和法利賽人常常禁食，你的門徒倒不禁食，這是為甚麼呢？』</p>
+<p class="paragraph">耶穌對他們說：『新郎和陪伴之人同在的時候，陪伴之人豈能哀慟呢？但日子將到，新郎要離開他們，那時候他們就要禁食。』」（太 9:14-15）</p>
+<p class="paragraph">今天，我們要查考聖經中關於禁食的實踐、姿態與應許。禁食或許對我們的文化而言顯得陌生，但卻該是跟隨耶穌門徒的生活方式。 禁食使我們謙卑 （詩69:10），喚醒我們屬靈的渴慕（林前 6:12；腓 3:19、8），賦予禱告能力（拉 8:23；珥 2:12；拿 3:10），並且突破邪靈權勢（但 10 章；太 17:19-21）。</p>
+<p class="paragraph">首先，禁食是一項合乎聖經的操練。摩西、大衛、以利亞、但以理、以斯帖、哈拿與亞拿，都將自己投入禁食（但 10 章；拿 3 章；代下 20 章；王上 19 章）。</p>
+<p class="paragraph">禁食的實踐同樣貫穿教會歷史。初代教會每週禁食兩次；後來如約翰‧衛斯理（John Wesley）、喬治‧懷特腓（George Whitefield）、馬丁‧路德（Martin Luther）、約翰‧諾克斯（John Knox）、大衛‧布雷納德（DavidBrainerd）等人也都如此，我們的屬靈前輩們皆參與禁食。最重要的是，我們的主耶穌親自吩咐門徒：不是「若你們禁食」，而是「當你們禁食的時候」（太6:16–18）。</p>
+<p class="paragraph">禁食不僅是外在的回應或行為，它源自一個對神極度渴慕的姿態。在馬太福音 9:15-16 中，耶穌將祂的教會從沒有生命力的宗教活動、與殘酷的苦修主義中釋放出來，清楚說明了我們為何、以及何時要禁食。翻成現代語言，耶穌是在說：「當我與你們同在時，是說不出的喜樂；但有一天我將離開，當我不在時，你們會非常深切地想念我、渴望我回來，以至於你們願意付上一切代價，只為再得著我——甚至禁食。」</p>
+<p class="paragraph">為宗教緣故禁食將導致死亡（林後 3:6）。若是人為的計畫為復興而禁食禱告，也終將無可避免地導致灰心或冷漠。然而，我們禁食與禱告，應首先在我們個人的生命中，並出自對著祂的渴慕。當我們禁食，我們放下其他所有的追求，甚至包含身體對食物的基本需要，因著這份只為祂、佔據一切思緒的渴望。但同時，我們在吃另一種糧——天上的糧。正如我們的主在禁食時所說的：「人活着，不是單靠食物，乃是靠神口裏所出的一切話。」（太 4:4）</p>
+<p class="paragraph">為著復興的真實禁食禱告，其實就是迫切渴望祂集體性的造訪我們（徒 3:19-20），渴望祂介入我們的國家。這不僅止於靈魂得救或神蹟發生，終極目標在於百姓再次普及、群體性地靠祂歡喜（詩85:6）。在那日未到之前，我們持續為著良人的造訪而哀慟、禁食。</p>
 <p class="prayer-heading">請與我們一起禱告</p>
-<p class="paragraph">主啊，藉著禁食、哭泣與哀慟，我們全心回轉向祢。求</p>
-<p class="paragraph">祢鑒察我們心中任何偏離之處，任何沒有理當真實渴慕祢的部分。我們立定心志，全心尋求祢，並悔改在禁食禱告中任何錯誤動機或偶像。我們渴望祢如同在過去世代的作為，再次造訪這個國家，聖靈啊，求祢再來！聖靈啊，求祢再來！</p>
-      </article>
-      <footer>內容來源：2026 21天禁禱禱告指引。此頁為本機產生的手機閱讀版。</footer>
+<p class="paragraph">主啊，藉著禁食、哭泣與哀慟，我們全心回轉向祢。求祢鑒察我們心中任何偏離之處，任何沒有理當真實渴慕祢的部分。我們立定心志，全心尋求祢，並悔改在禁食禱告中任何錯誤動機或偶像。我們渴望祢如同在過去世代的作為，再次造訪這個國家，聖靈啊，求祢再來！聖靈啊，求祢再來！</p>
+      <p class="footer-note">朗讀版已移除括號內經文出處；閱讀版保留原文經文參照。</p>
     </section>
-  </main>
+  </article>
+</main>
 </body>
 </html>
-
-
