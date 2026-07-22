@@ -20,6 +20,8 @@ jobs:
       TZ: Asia/Taipei
       GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
       PRAYER_WORKBOOK_B64: ${{ secrets.PRAYER_WORKBOOK_B64 }}
+      LINE_CHANNEL_ACCESS_TOKEN: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
+      LINE_GROUP_ID: ${{ secrets.LINE_GROUP_ID }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -88,9 +90,54 @@ jobs:
             tr -d '\r' < "day-${DAY}.html" > local-day.html
             tr -d '\r' < public-day.html > normalized-public-day.html
             grep -q '<title>' public-day.html || { sleep 10; continue; }
+            grep -q '<h1>' public-day.html || { sleep 10; continue; }
             test "$(sha256sum local-day.html | cut -d' ' -f1)" = "$(sha256sum normalized-public-day.html | cut -d' ' -f1)" || { sleep 10; continue; }
             test "$(sha256sum "day-${DAY}.wav" | cut -d' ' -f1)" = "$(sha256sum public-day.wav | cut -d' ' -f1)" || { sleep 10; continue; }
             exit 0
           done
           echo 'Public Pages verification did not pass within 10 minutes.' >&2
           exit 1
+
+      - name: Notify LINE announcement group
+        if: steps.generate.outputs.skipped != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$LINE_CHANNEL_ACCESS_TOKEN"
+          test -n "$LINE_GROUP_ID"
+          python - "${{ steps.generate.outputs.day }}" <<'PY'
+          from datetime import datetime, timedelta
+          from html import unescape
+          from pathlib import Path
+          from zoneinfo import ZoneInfo
+          import os
+          import re
+          import sys
+
+          import requests
+
+          day = sys.argv[1]
+          page = Path(f"day-{day}.html").read_text(encoding="utf-8")
+          match = re.search(r"<h1[^>]*>(.*?)</h1>", page, re.DOTALL | re.IGNORECASE)
+          if not match:
+              raise SystemExit("Could not read the day topic from the published HTML.")
+          topic = re.sub(r"<[^>]+>", "", unescape(match.group(1))).strip()
+          tomorrow = (datetime.now(ZoneInfo("Asia/Taipei")).date() + timedelta(days=1)).strftime("%Y/%m/%d")
+          text = "\n".join((
+              "2026 21天禁禱｜明日內容已完成",
+              f"日期：{tomorrow}",
+              f"進度：第 {int(day)} 天",
+              f"主題：{topic}",
+              "狀態：禱告指引、朗讀音檔及首頁均已重新製作並上架，公開網址驗證成功。",
+              f"閱讀與聆聽：https://lovepaul0707.github.io/prayer-guide-2026/day-{day}.html",
+              "全部內容：https://lovepaul0707.github.io/prayer-guide-2026/",
+          ))
+          response = requests.post(
+              "https://api.line.me/v2/bot/message/push",
+              headers={"Authorization": f"Bearer {os.environ['LINE_CHANNEL_ACCESS_TOKEN']}"},
+              json={"to": os.environ["LINE_GROUP_ID"], "messages": [{"type": "text", "text": text}]},
+              timeout=30,
+          )
+          response.raise_for_status()
+          print("LINE API notification accepted.")
+          PY
