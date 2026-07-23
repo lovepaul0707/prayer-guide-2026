@@ -333,11 +333,16 @@ def main() -> None:
     chunks = make_chunks(day)
     (OUT / f"day-{day_index:02d}-tts-script.txt").write_text("\n\n---CHUNK---\n\n".join(chunks), encoding="utf-8")
     (SITE / f"day-{day_index:02d}.html").write_text(render_day_html(day), encoding="utf-8")
-    available_days = []
-    for p in sorted(SITE.glob("day-*.html")):
-        m = re.search(r"day-(\d+)\.html$", p.name)
-        if m:
-            available_days.append(load_day(int(m.group(1))))
+    # The local generator keeps prior pages in site/, whereas the cloud
+    # workflow checks out previously published pages at the repository root.
+    # Include both locations so rebuilding the homepage never drops history.
+    available_indexes: set[int] = set()
+    for base in (SITE, ROOT):
+        for p in base.glob("day-*.html"):
+            m = re.search(r"day-(\d+)\.html$", p.name)
+            if m:
+                available_indexes.add(int(m.group(1)))
+    available_days = [load_day(i) for i in sorted(available_indexes)]
     (SITE / "index.html").write_text(render_index(available_days), encoding="utf-8")
     log("html_completed", f"完成第 {day_index} 天 HTML 與首頁更新。", day=day_index, file=str(SITE / f"day-{day_index:02d}.html"))
     audio = generate_audio(day_index, chunks)
