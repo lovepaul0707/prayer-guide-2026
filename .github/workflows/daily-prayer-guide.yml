@@ -31,10 +31,26 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Reject delayed scheduled execution after midnight
+        id: schedule_window
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "$GITHUB_EVENT_NAME" = "schedule" ]; then
+            hour="$(TZ=Asia/Taipei date +%H)"
+            if [ "$hour" != "22" ] && [ "$hour" != "23" ]; then
+              echo "skipped=true" >> "$GITHUB_OUTPUT"
+              echo "Scheduled run started outside the 22:00-23:59 Asia/Taipei production window; no content was generated."
+              exit 0
+            fi
+          fi
+          echo "skipped=false" >> "$GITHUB_OUTPUT"
+
       - name: Install the generator requirements
         run: python -m pip install --disable-pip-version-check requests openpyxl
 
       - name: Restore the private workbook for this run
+        if: steps.schedule_window.outputs.skipped != 'true'
         shell: bash
         run: |
           set -euo pipefail
@@ -44,6 +60,7 @@ jobs:
           printf '%s' "$PRAYER_WORKBOOK_B64" | base64 --decode > 'outputs/2026_21天禁禱禱告指引_繁體中文.xlsx'
 
       - name: Generate tomorrow's HTML and audio
+        if: steps.schedule_window.outputs.skipped != 'true'
         id: generate
         shell: bash
         run: |
@@ -61,7 +78,7 @@ jobs:
           printf 'day=%02d\n' "$DAY" >> "$GITHUB_OUTPUT"
 
       - name: Commit only the published files
-        if: steps.generate.outputs.skipped != 'true'
+        if: steps.schedule_window.outputs.skipped != 'true' && steps.generate.outputs.skipped != 'true'
         shell: bash
         run: |
           set -euo pipefail
@@ -77,7 +94,7 @@ jobs:
           git push origin HEAD:main
 
       - name: Verify public Pages files and hashes
-        if: steps.generate.outputs.skipped != 'true'
+        if: steps.schedule_window.outputs.skipped != 'true' && steps.generate.outputs.skipped != 'true'
         shell: bash
         run: |
           set -euo pipefail
@@ -99,7 +116,7 @@ jobs:
           exit 1
 
       - name: Notify LINE announcement group
-        if: steps.generate.outputs.skipped != 'true'
+        if: steps.schedule_window.outputs.skipped != 'true' && steps.generate.outputs.skipped != 'true'
         shell: bash
         run: |
           set -euo pipefail
