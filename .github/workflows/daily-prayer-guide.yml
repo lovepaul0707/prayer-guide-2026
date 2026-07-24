@@ -5,6 +5,11 @@ on:
     # 22:20 Asia/Taipei (UTC+8). GitHub Actions cron is evaluated in UTC.
     - cron: "20 14 * * *"
   workflow_dispatch:
+    inputs:
+      target_date:
+        description: "Target prayer date as YYYY-MM-DD. Leave blank for tomorrow in Asia/Taipei."
+        required: false
+        type: string
 
 permissions:
   contents: write
@@ -49,7 +54,10 @@ jobs:
               exit 0
             fi
           else
-            target_date="$(TZ=Asia/Taipei date -d tomorrow +%F)"
+            target_date="${{ inputs.target_date }}"
+            if [ -z "$target_date" ]; then
+              target_date="$(TZ=Asia/Taipei date -d tomorrow +%F)"
+            fi
           fi
           day="$(python - "$target_date" <<'PY'
           from datetime import date
