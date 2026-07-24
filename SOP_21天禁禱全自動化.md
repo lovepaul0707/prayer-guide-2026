@@ -37,9 +37,9 @@ commit message 為 `Update prayer guide day XX`。GitHub Pages 公開驗證必�
 
 任一條件失敗即讓工作流失敗，且不得傳送 LINE。
 
-## LINE Messaging API
+## LINE Messaging API relay
 
-僅在公開驗證成功後，以 LINE Messaging API 呼叫 `https://api.line.me/v2/bot/message/push`，目標為 `LINE_GROUP_ID`（「公佈」群組）。不使用桌面版 LINE、螢幕座標、自動貼上或截圖驗證。
+禁禱主工作流不保存或使用 LINE token。公開驗證成功後，通知由 `daily-bible-reading-2026` 的 `prayer-guide-line-relay.yml` 以已驗證的 `LINE_CHANNEL_ACCESS_TOKEN` 與 `LINE_GROUP_ID` 傳送至「公佈」群組。不使用桌面版 LINE、螢幕座標、自動貼上或截圖驗證。
 
 通知格式：
 
