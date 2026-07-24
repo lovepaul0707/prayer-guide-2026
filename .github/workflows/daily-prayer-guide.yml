@@ -123,20 +123,7 @@ jobs:
             tr -d '\r' < "day-${DAY}.html" > local-day.html
             tr -d '\r' < public-day.html > normalized-public-day.html
             test "$(sha256sum local-index.html | cut -d' ' -f1)" = "$(sha256sum normalized-public-index.html | cut -d' ' -f1)" || { sleep 10; continue; }
-            python - local-day.html normalized-public-day.html <<'PY' || { sleep 10; continue; }
-            import re
-            import sys
-
-            def title(path: str) -> str:
-                text = open(path, encoding="utf-8").read()
-                match = re.search(r"<title>(.*?)</title>", text, re.DOTALL | re.IGNORECASE)
-                if not match:
-                    raise SystemExit("Missing HTML title")
-                return re.sub(r"\s+", " ", match.group(1)).strip()
-
-            if title(sys.argv[1]) != title(sys.argv[2]):
-                raise SystemExit("Published day title differs from the generated title")
-            PY
+            python -c 'import re,sys; title=lambda path: re.sub(r"\s+", " ", re.search(r"<title>(.*?)</title>", open(path, encoding="utf-8").read(), re.S | re.I).group(1)).strip(); assert title(sys.argv[1]) == title(sys.argv[2]), "Published day title differs from the generated title"' local-day.html normalized-public-day.html || { sleep 10; continue; }
             test "$(sha256sum local-day.html | cut -d' ' -f1)" = "$(sha256sum normalized-public-day.html | cut -d' ' -f1)" || { sleep 10; continue; }
             test "$(sha256sum "day-${DAY}.wav" | cut -d' ' -f1)" = "$(sha256sum public-day.wav | cut -d' ' -f1)" || { sleep 10; continue; }
             exit 0
