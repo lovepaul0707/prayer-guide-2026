@@ -118,10 +118,25 @@ jobs:
             curl --fail --silent --show-error "$BASE/" -o public-index.html && \
             curl --fail --silent --show-error "$BASE/day-${DAY}.html" -o public-day.html && \
             curl --fail --silent --show-error "$BASE/day-${DAY}.wav" -o public-day.wav || { sleep 10; continue; }
+            tr -d '\r' < index.html > local-index.html
+            tr -d '\r' < public-index.html > normalized-public-index.html
             tr -d '\r' < "day-${DAY}.html" > local-day.html
             tr -d '\r' < public-day.html > normalized-public-day.html
-            grep -q '<title>' public-day.html || { sleep 10; continue; }
-            grep -q '<h1>' public-day.html || { sleep 10; continue; }
+            test "$(sha256sum local-index.html | cut -d' ' -f1)" = "$(sha256sum normalized-public-index.html | cut -d' ' -f1)" || { sleep 10; continue; }
+            python - local-day.html normalized-public-day.html <<'PY' || { sleep 10; continue; }
+            import re
+            import sys
+
+            def title(path: str) -> str:
+                text = open(path, encoding="utf-8").read()
+                match = re.search(r"<title>(.*?)</title>", text, re.DOTALL | re.IGNORECASE)
+                if not match:
+                    raise SystemExit("Missing HTML title")
+                return re.sub(r"\s+", " ", match.group(1)).strip()
+
+            if title(sys.argv[1]) != title(sys.argv[2]):
+                raise SystemExit("Published day title differs from the generated title")
+            PY
             test "$(sha256sum local-day.html | cut -d' ' -f1)" = "$(sha256sum normalized-public-day.html | cut -d' ' -f1)" || { sleep 10; continue; }
             test "$(sha256sum "day-${DAY}.wav" | cut -d' ' -f1)" = "$(sha256sum public-day.wav | cut -d' ' -f1)" || { sleep 10; continue; }
             exit 0
@@ -129,7 +144,7 @@ jobs:
           echo 'Public Pages verification did not pass within 10 minutes.' >&2
           exit 1
 
-      - name: Notify LINE announcement group
+      - name: Notify LINE announcement group via Messaging API
         if: steps.schedule_window.outputs.skipped != 'true' && steps.generate.outputs.skipped != 'true'
         shell: bash
         run: |
