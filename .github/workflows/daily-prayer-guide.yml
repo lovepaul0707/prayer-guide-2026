@@ -31,20 +31,38 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Reject delayed scheduled execution after midnight
+      - name: Determine safe scheduled target date
         id: schedule_window
         shell: bash
         run: |
           set -euo pipefail
           if [ "$GITHUB_EVENT_NAME" = "schedule" ]; then
             hour="$(TZ=Asia/Taipei date +%H)"
-            if [ "$hour" != "22" ] && [ "$hour" != "23" ]; then
+            if [ "$hour" = "22" ] || [ "$hour" = "23" ]; then
+              target_date="$(TZ=Asia/Taipei date -d tomorrow +%F)"
+            elif [ "$hour" = "00" ] || [ "$hour" = "01" ]; then
+              # GitHub scheduled workflows can be delayed.  This is still the
+              # prior evening's run, so publish today's page rather than an
+              # extra page for tomorrow.
+              target_date="$(TZ=Asia/Taipei date +%F)"
+            else
               echo "skipped=true" >> "$GITHUB_OUTPUT"
-              echo "Scheduled run started outside the 22:00-23:59 Asia/Taipei production window; no content was generated."
+              echo "Scheduled run started outside the safe 22:00-01:59 Asia/Taipei production window; no content was generated."
               exit 0
             fi
+          else
+            target_date="$(TZ=Asia/Taipei date -d tomorrow +%F)"
           fi
+          day="$(python - "$target_date" <<'PY'
+          from datetime import date
+          import sys
+          target = date.fromisoformat(sys.argv[1])
+          print((target - date(2026, 7, 13)).days + 1)
+          PY
+          )"
           echo "skipped=false" >> "$GITHUB_OUTPUT"
+          echo "target_date=$target_date" >> "$GITHUB_OUTPUT"
+          printf 'day=%02d\n' "$day" >> "$GITHUB_OUTPUT"
 
       - name: Install the generator requirements
         run: python -m pip install --disable-pip-version-check requests openpyxl
@@ -65,16 +83,12 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python work/auto_day_pipeline.py | tee generation.json
+          DAY="${{ steps.schedule_window.outputs.day }}"
+          python work/auto_day_pipeline.py "$DAY" | tee generation.json
           if grep -q '"skipped": true' generation.json; then
             echo "skipped=true" >> "$GITHUB_OUTPUT"
             exit 0
           fi
-          DAY="$(python - <<'PY'
-          from datetime import date, timedelta
-          print((date.today() + timedelta(days=1) - date(2026, 7, 13)).days + 1)
-          PY
-          )"
           printf 'day=%02d\n' "$DAY" >> "$GITHUB_OUTPUT"
 
       - name: Commit only the published files
@@ -122,11 +136,9 @@ jobs:
           set -euo pipefail
           test -n "$LINE_CHANNEL_ACCESS_TOKEN"
           test -n "$LINE_GROUP_ID"
-          python - "${{ steps.generate.outputs.day }}" <<'PY'
-          from datetime import datetime, timedelta
+          python - "${{ steps.generate.outputs.day }}" "${{ steps.schedule_window.outputs.target_date }}" <<'PY'
           from html import unescape
           from pathlib import Path
-          from zoneinfo import ZoneInfo
           import os
           import re
           import sys
@@ -134,12 +146,13 @@ jobs:
           import requests
 
           day = sys.argv[1]
+          target_date = sys.argv[2]
           page = Path(f"day-{day}.html").read_text(encoding="utf-8")
           match = re.search(r"<h1[^>]*>(.*?)</h1>", page, re.DOTALL | re.IGNORECASE)
           if not match:
               raise SystemExit("Could not read the day topic from the published HTML.")
           topic = re.sub(r"<[^>]+>", "", unescape(match.group(1))).strip()
-          tomorrow = (datetime.now(ZoneInfo("Asia/Taipei")).date() + timedelta(days=1)).strftime("%Y/%m/%d")
+          tomorrow = target_date.replace("-", "/")
           text = "\n".join((
               "2026 21天禁禱｜明日內容已完成",
               f"日期：{tomorrow}",
