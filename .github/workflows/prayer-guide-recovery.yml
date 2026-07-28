@@ -1,0 +1,98 @@
+name: Prayer guide recovery watchdog
+
+on:
+  # Independent retry points after the primary 22:20 Asia/Taipei schedule.
+  # Times are UTC because GitHub cron is evaluated in UTC.
+  schedule:
+    - cron: "35,50 14 * * *" # 22:35, 22:50 Asia/Taipei
+    - cron: "5,20,35,50 15 * * *" # 23:05-23:50 Asia/Taipei
+    - cron: "5,20,35,50 16 * * *" # 00:05-00:50 Asia/Taipei
+    - cron: "5,20,35,50 17 * * *" # 01:05-01:50 Asia/Taipei
+  workflow_dispatch:
+    inputs:
+      target_date:
+        description: "Target prayer date as YYYY-MM-DD. Leave blank for the current recovery window."
+        required: false
+        type: string
+
+permissions:
+  actions: write
+  contents: read
+
+concurrency:
+  group: prayer-guide-recovery-watchdog
+  cancel-in-progress: false
+
+jobs:
+  recover-if-missing:
+    runs-on: ubuntu-latest
+    env:
+      TZ: Asia/Taipei
+      REPOSITORY: ${{ github.repository }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Determine the expected prayer day
+        id: target
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ] && [ -n "${{ inputs.target_date }}" ]; then
+            target_date="${{ inputs.target_date }}"
+          else
+            hour="$(TZ=Asia/Taipei date +%H)"
+            if [ "$hour" = "22" ] || [ "$hour" = "23" ]; then
+              target_date="$(TZ=Asia/Taipei date -d tomorrow +%F)"
+            elif [ "$hour" = "00" ] || [ "$hour" = "01" ]; then
+              target_date="$(TZ=Asia/Taipei date +%F)"
+            else
+              echo "ready=false" >> "$GITHUB_OUTPUT"
+              echo "Outside the recovery window; no dispatch requested."
+              exit 0
+            fi
+          fi
+          day="$(python - "$target_date" <<'PY'
+          from datetime import date
+          import sys
+          print((date.fromisoformat(sys.argv[1]) - date(2026, 7, 13)).days + 1)
+          PY
+          )"
+          if [ "$day" -lt 1 ] || [ "$day" -gt 21 ]; then
+            echo "Target date is outside the 21-day programme." >&2
+            exit 1
+          fi
+          printf 'ready=true\ntarget_date=%s\nday=%02d\n' "$target_date" "$day" >> "$GITHUB_OUTPUT"
+
+      - name: Check whether the public day is already complete
+        id: public
+        if: steps.target.outputs.ready == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          day="${{ steps.target.outputs.day }}"
+          base='https://lovepaul0707.github.io/prayer-guide-2026'
+          if curl --fail --silent --show-error "$base/" -o index.html && \
+             curl --fail --silent --show-error "$base/day-${day}.html" -o day.html && \
+             curl --fail --silent --show-error "$base/day-${day}.wav" -o day.wav && \
+             grep -Eq "第[[:space:]]*${day#0}[[:space:]]*天" day.html && \
+             grep -Fq "day-${day}.html" index.html; then
+            echo "complete=true" >> "$GITHUB_OUTPUT"
+            echo "Public day ${day} is already complete; no recovery dispatch needed."
+          else
+            echo "complete=false" >> "$GITHUB_OUTPUT"
+            echo "Public day ${day} is missing or incomplete; dispatching recovery."
+          fi
+
+      - name: Dispatch the dated production recovery
+        if: steps.target.outputs.ready == 'true' && steps.public.outputs.complete != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          payload="$(printf '{"ref":"main","inputs":{"target_date":"%s"}}' "${{ steps.target.outputs.target_date }}")"
+          curl --fail --silent --show-error --request POST \
+            --header "Accept: application/vnd.github+json" \
+            --header "Authorization: Bearer $GH_TOKEN" \
+            --header "X-GitHub-Api-Version: 2022-11-28" \
+            --header "Content-Type: application/json" \
+            --data "$payload" \
+            "https://api.github.com/repos/$REPOSITORY/actions/workflows/daily-prayer-guide.yml/dispatches"
+          echo "Requested dated recovery for ${{ steps.target.outputs.target_date }}."
