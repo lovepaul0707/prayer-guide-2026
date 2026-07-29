@@ -1,6 +1,10 @@
 name: Daily prayer guide
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - '.automation-trigger/target-date.txt'
   schedule:
     # 22:20 Asia/Taipei (UTC+8). GitHub Actions cron is evaluated in UTC.
     - cron: "20 14 * * *"
@@ -39,7 +43,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          if [ "$GITHUB_EVENT_NAME" = "schedule" ]; then
+          if [ "$GITHUB_EVENT_NAME" = "push" ]; then
+            target_date="$(tr -d '\r\n' < .automation-trigger/target-date.txt)"
+          elif [ "$GITHUB_EVENT_NAME" = "schedule" ]; then
             hour="$(TZ=Asia/Taipei date +%H)"
             if [ "$hour" = "22" ] || [ "$hour" = "23" ]; then
               target_date="$(TZ=Asia/Taipei date -d tomorrow +%F)"
